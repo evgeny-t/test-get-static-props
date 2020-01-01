@@ -1,15 +1,16 @@
-import { NextPage } from 'next'
-import Link from 'next/link'
+import { NextPage } from "next";
+import Link from "next/link";
 
-import Layout from '../../components/Layout'
-import List from '../../components/List'
-import { User } from '../../interfaces'
-import { sampleFetchWrapper } from '../../utils/sample-api'
+import { readJsonSync } from "fs-extra";
+
+import Layout from "../../components/Layout";
+import List from "../../components/List";
+import { User } from "../../interfaces";
 
 type Props = {
-  items: User[]
-  pathname: string
-}
+  items: User[];
+  pathname: string;
+};
 
 const WithInitialProps: NextPage<Props> = ({ items, pathname }) => (
   <Layout title="Users List | Next.js + TypeScript Example">
@@ -25,17 +26,18 @@ const WithInitialProps: NextPage<Props> = ({ items, pathname }) => (
       </Link>
     </p>
   </Layout>
-)
+);
 
-WithInitialProps.getInitialProps = async ({ pathname }) => {
-  // Example for including initial props in a Next.js function component page.
-  // Don't forget to include the respective types for any props passed into
-  // the component.
-  const items: User[] = await sampleFetchWrapper(
-    'http://localhost:3000/api/users'
-  )
+// @ts-ignore
+export async function unstable_getStaticProps(params) {
+  console.log("getStaticProps", params);
 
-  return { items, pathname }
+  const data: User[] = readJsonSync("./data.json");
+  return {
+    props: {
+      items: data
+    }
+  };
 }
 
-export default WithInitialProps
+export default WithInitialProps;

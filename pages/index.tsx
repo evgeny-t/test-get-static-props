@@ -1,9 +1,13 @@
 import * as React from "react";
 import Link from "next/link";
-import Layout from "../components/Layout";
 import { NextPage } from "next";
 
-const IndexPage: NextPage = props => {
+import { readJsonSync } from "fs-extra";
+
+import Layout from "../components/Layout";
+import { User } from "../interfaces";
+
+const IndexPage: NextPage<{ names: string[] }> = props => {
   return (
     <Layout title="Home | Next.js + TypeScript Example">
       <h1>Hello Next.js 👋</h1>
@@ -15,6 +19,11 @@ const IndexPage: NextPage = props => {
           <a>About</a>
         </Link>
       </p>
+      <section>
+        {props.names.map(name => (
+          <div>{name}</div>
+        ))}
+      </section>
     </Layout>
   );
 };
@@ -22,9 +31,10 @@ const IndexPage: NextPage = props => {
 // @ts-ignore
 export async function unstable_getStaticProps(params) {
   console.log("getStaticProps", params);
+  const data: User[] = readJsonSync("./data.json");
   return {
     props: {
-      staticProp: params
+      names: data.map(user => user.name)
     }
   };
 }
