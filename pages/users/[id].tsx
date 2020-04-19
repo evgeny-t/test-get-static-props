@@ -1,59 +1,41 @@
 import * as React from "react";
+import { GetStaticPaths, GetStaticProps } from "next";
 
 import { readJsonSync } from "fs-extra";
 
 import { User } from "../../interfaces";
-import Layout from "../../components/Layout";
-import ListDetail from "../../components/ListDetail";
+
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  const data: User[] = readJsonSync("./data.json");
+  const item = data.find(({ name }) => params?.id === `${name}`);
+
+  return {
+    props: {
+      item,
+    },
+  };
+};
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const data: User[] = readJsonSync("./data.json");
+
+  return {
+    paths: data.map(({ name }) => `/users/${name}`),
+    fallback: false,
+  };
+};
 
 type Props = {
   item?: User;
   errors?: string;
 };
 
-class InitialPropsDetail extends React.Component<Props> {
-  render() {
-    const { item, errors } = this.props;
+export default (props: Props) => {
+  const { item } = props;
 
-    if (errors) {
-      return (
-        <Layout title={`Error | Next.js + TypeScript Example`}>
-          <p>
-            <span style={{ color: "red" }}>Error:</span> {errors}
-          </p>
-        </Layout>
-      );
-    }
-
-    return (
-      <Layout
-        title={`${
-          item ? item.name : "User Detail"
-        } | Next.js + TypeScript Example`}
-      >
-        {item && <ListDetail item={item} />}
-      </Layout>
-    );
-  }
-}
-
-// @ts-ignore
-export async function unstable_getStaticProps({ params }) {
-  console.log("getStaticProps", params);
-
-  const data: User[] = readJsonSync("./data.json");
-  const item = data.find(({ id }) => params.id === `${id}`);
-  console.log("item", item);
-  return {
-    props: {
-      item
-    }
-  };
-}
-
-export async function unstable_getStaticPaths() {
-  const data: User[] = readJsonSync("./data.json");
-  return data.map(user => ({ params: { id: `${user.id}` } }));
-}
-
-export default InitialPropsDetail;
+  return (
+    <div>
+      {item?.id} - {item?.name}
+    </div>
+  );
+};
